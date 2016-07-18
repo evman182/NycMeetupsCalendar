@@ -1,0 +1,88 @@
+﻿@model Dictionary<DateTime, List<NycMeetupsCalendar.Models.CalendarModels.Event>>
+
+@functions {
+    private static string GetStyleStringForDate(dynamic date)
+    {
+        var styleString = string.Empty;
+        if (date == DateTime.Today)
+        {
+            styleString = "background-color: #e0f6f7;";
+        }
+        return styleString;
+    }
+}
+
+@helper GetCell(int day)
+{
+    var key = ViewBag.SortedKeys[day];
+    for(int x = 0; x < Model[key].Count; x++)
+    {
+        var e = Model[key][x];
+        <span class="event"><a href="@e.Url">@e.Title</a></span><br/>
+        if (x < Model[key].Count - 1)
+        {
+            <hr/><br/>
+        }
+    }
+}
+@helper GetDateHeaders(int start, int end)
+{
+    var sortedKeys = ViewBag.SortedKeys;
+
+    for (int x = start; x <= end; x++)
+    {
+        var styleString = GetStyleStringForDate(sortedKeys[x]);
+        <td class="calendarDates" style="@styleString">@sortedKeys[x].ToString("MM/dd/yy")</td>
+    }
+}
+@helper GetEventRow(int start, int end)
+{
+    for (int x = start; x <= end; x++)
+    {
+        var styleString = GetStyleStringForDate(ViewBag.SortedKeys[x]);
+        <td style="@styleString">
+            @GetCell(x)
+        </td>
+    }
+}
+
+
+@{
+    ViewBag.Title = "/r/nycmeetups Two Week Calendar";
+    ViewBag.SortedKeys = Model.Keys.OrderBy(k => k).ToList();
+}
+
+
+<div class="row">
+    <div class="col-md-12">
+        <table border="1" cellpadding="5px">
+            <tr id="dayNames">
+                <td>Sunday</td>
+                <td>Monday</td>
+                <td>Tuesday</td>
+                <td>Wednesday</td>
+                <td>Thursday</td>
+                <td>Friday</td>
+                <td>Saturday</td>
+            </tr>
+            <tr class="datesRow">
+                @GetDateHeaders(0, 6)
+            </tr>
+            <tr class="eventsRow">
+                @GetEventRow(0, 6)
+            </tr>
+            <tr class="datesRow">
+                @GetDateHeaders(7, 13)
+            </tr>
+            <tr class="eventsRow">
+                @GetEventRow(7, 13)
+            </tr>
+        </table>
+
+        <br/><br/>
+        Calendar up-to-date as of @TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time")).ToString("T"). Updates every 5 minutes
+        <!--@TimeZone.CurrentTimeZone.StandardName-->
+
+    </div>
+
+</div>
